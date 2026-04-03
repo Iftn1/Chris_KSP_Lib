@@ -46,8 +46,13 @@ function gui_make_peglandgui {
     declare global gui_orbitanalysis_result1 to gui_orbitanalysis_box:addlabel("").
     declare global gui_orbitanalysis_result2 to gui_orbitanalysis_box:addlabel("").
     declare global gui_orbitanalysis_result3 to gui_orbitanalysis_box:addlabel("").
+    declare global gui_orbitanalysis_result4 to gui_orbitanalysis_box:addlabel("").
     set gui_orbitanalysis_button:onclick to {
         local result to analyze_initial_orbit().
+        if (not result["ok"]) {
+            set gui_orbitanalysis_result1:text to result["msg"].
+            return.
+        }
         local distR_text to "".
         local distR_rmd_max to result["distR_rmd"] * 1.5.
         local distR_rmd_min to result["distR_rmd"] * 0.5.
@@ -68,9 +73,10 @@ function gui_make_peglandgui {
         //     + "Height = " + distR_text + " km;"
         //     + "Lateral distance = " + distH_text + " km".
         // set gui_orbitanalysis_result:text to result_text.
-        set gui_orbitanalysis_result1:text to "Estimated burn time ≈ " + round(result["burntime"]) + " s".
+        set gui_orbitanalysis_result1:text to "Estimated burn time = " + round(result["burntime"]) + " s".
         set gui_orbitanalysis_result2:text to "Estimated descent distance = " + distR_text + " km".
         set gui_orbitanalysis_result3:text to "Estimated lateral distance = " + distH_text + " km".
+        set gui_orbitanalysis_result4:text to result["msg"].
     }.
 
     // emergency suppress
@@ -413,6 +419,12 @@ on guidance_status {
 }
 
 function analyze_initial_orbit {
+    if (abs(ve) < 1e-5 or abs(f0) < 1e-5) {
+        return lexicon(
+            "ok", false,
+            "msg", "No enough thrust for landing!"
+        ).
+    }
     local vecRL to target_geo:position-ship:body:position.
     set vecRL to vecRL:normalized * (vecRL:mag + desRT).
     local distH to abs(vDot(vecRL, unitUy)).
@@ -427,11 +439,23 @@ function analyze_initial_orbit {
     // 1 round iteration to calibrate gravity loss
     set vr_etaL to vr_etaL + g0 * burntime.
     set burntime to ship:mass * ve / f0 * (1 - exp(-v_etaL/ve)).
+    // TWR diagnosis
+    local massf to ship:mass - burntime * f0 / ve.
+    local TWRf to f0 / massf / g0.
+    local msg to "".
+    if (TWRf < 1) {
+        set msg to msg + "Final TWR = " + round(TWRf, 2) + ", unable to land".
+    }
+    else if (TWRf < 1.4) {
+        set msg to msg + "Final TWR = " + round(TWRf, 2) + ", hard to converge".
+    }
 
     local distR_rmd to 0.125 * g0 * burntime^2.
     local distH_rmd to 0.06 * vt_etaL * burntime.
 
     return lexicon(
+        "ok", true,
+        "msg", msg,
         "burntime", burntime,
         "distR", distR,
         "distH", distH,
