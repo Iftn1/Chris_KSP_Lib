@@ -233,7 +233,7 @@ function phase_descent {
     // vecDraw({return ship:body:position+(gst["vecRF"]-gst["vecErr"]).}, {return (gst["vecRF"]-gst["vecErr"]):normalized*30000.}, RGB(0, 255, 0), "RL", 1, true).
     local theta0 to gst["eta0"].
     local init_num_iter to gst["numiter"].
-    print UI_LANG["lbl_peg_iter"] + init_num_iter + ", " + UI_LANG["lbl_peg_t"] + round(gst["T"]) + " s, " + UI_LANG["lbl_peg_dv"] + round(_peg_get_dv(a0, ve, gst["T"])) + " m/s " AT(0,14).
+    print UI_LANG["lbl_peg_iter"] + init_num_iter + ", " + UI_LANG["lbl_peg_t"] + round(gst["T"]) + " s, " + UI_LANG["lbl_peg_dv"] + round(__peg_get_dv(a0, ve, gst["T"])) + " m/s " AT(0,14).
     if P_GUI {
         gui_update_status_display(lexicon(
             "status", UI_LANG["status_peg_init"],
@@ -343,7 +343,7 @@ function phase_descent {
         set _time_begin to __time_begin.
         set throttle_control["thrust_target"] to gst["throttle"]*f0.
         set num_iter to num_iter + 1.
-        print UI_LANG["lbl_peg_iter"] + num_iter + ", " + UI_LANG["lbl_peg_t"] + round(gst["T"]) + " s, " + UI_LANG["lbl_peg_dv"] + round(_peg_get_dv(throttle_control["thrust_target"]/ship:mass, ve, gst["T"])) + " m/s " AT(0,14).
+        print UI_LANG["lbl_peg_iter"] + num_iter + ", " + UI_LANG["lbl_peg_t"] + round(gst["T"]) + " s, " + UI_LANG["lbl_peg_dv"] + round(__peg_get_dv(throttle_control["thrust_target"]/ship:mass, ve, gst["T"])) + " m/s " AT(0,14).
         print UI_LANG["lbl_thro"] + round(gst["throttle"], 3) + ", " + UI_LANG["lbl_vec_err"] + round(gst["vecErr"]:mag/1000, 4) + " km " AT(0,15).
         if P_GUI {
             gui_update_status_display(lexicon(
