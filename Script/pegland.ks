@@ -1,3 +1,4 @@
+runOncePath("0:/lang_zh.ks").
 parameter P_GUI to true.
 parameter P_PREC to false.
 parameter P_NOWAIT is false.
@@ -59,10 +60,10 @@ function init_print {
     // line 1~10: target position
     // line 11~20: guidance state
     clearScreen.
-    print "PEG landing guidance" AT(0,0).
-    print "============= Configuration ============" AT(0,1).
-    print "================ State =================" AT(0,11).
-    print "================ Result ================" AT(0,21).
+    print UI_LANG["peg_title"] AT(0,0).
+    print UI_LANG["peg_cfg_header"] AT(0,1).
+    print UI_LANG["peg_state_header"] AT(0,11).
+    print UI_LANG["peg_res_header"] AT(0,21).
 }
 
 function initialize_guidance {
@@ -127,18 +128,18 @@ function initialize_guidance {
 function print_engines_simple_info {
     parameter elist.
     local _summary to get_engines_info(elist).
-    print "Thrust = " + round(_summary:thrust, 2) + "kN       " AT(0,2).
-    print "Isp = " + round(_summary:ISP, 1) + "s       " AT (0,3).
-    print "Minthrottle = " + round(_summary:minthrottle, 2) + "       " AT(0,4).
-    print "Ullage = " + _summary:ullage + "   " AT(0,5).
-    print "Spool-up time = " + _summary:spooluptime AT(0,6).
+    print UI_LANG["lbl_thrust"] + round(_summary:thrust, 2) + " kN" AT(0,2).
+    print UI_LANG["lbl_isp"] + round(_summary:ISP, 1) + " s" AT(0,3).
+    print UI_LANG["lbl_min_thro"] + round(_summary:minthrottle, 2) + " " AT(0,4).
+    print UI_LANG["lbl_ullage"] + _summary:ullage + " " AT(0,5).
+    print UI_LANG["lbl_spool_time"] + _summary:spooluptime AT(0,6).
 }
 
 function set_engine_parameters {
     parameter elist.
     local enginfo to get_engines_info(elist).
     if (enginfo:thrust < 1e-7) {
-        hudtext("No thrust available", 4, 2, hudtextsize, hudtextcolor, false).
+        hudtext(UI_LANG["err_no_thrust"], 4, 2, hudtextsize, hudtextcolor, false).
         return.
     }
     set TiS to enginfo:TiS.
@@ -161,7 +162,7 @@ function update_target_geo {
     // move target position
     local _target_geo to get_target_geo().
     if _target_geo = 0 {
-        hudtext("No active waypoint", 4, 2, hudtextsize, hudtextcolor, false).
+        hudtext(UI_LANG["err_no_waypoint"], 4, 2, hudtextsize, hudtextcolor, false).
         set target_geo to ship:geoposition.
         set target_height to 0.
         return.
@@ -170,7 +171,7 @@ function update_target_geo {
     local adjfactor to 180/constant:pi/(ship:body:radius+target_geo:terrainheight).
     set target_geo to ship:body:geopositionlatlng(target_geo:lat+P_ADJUST:x*adjfactor, target_geo:lng+P_ADJUST:y*adjfactor*cos(target_geo:lat)).
     set target_height to P_ADJUST:z.
-    print "Target position: " + target_geo AT(0,7).
+    print UI_LANG["lbl_target_pos"] + target_geo AT(0,7).
 }
 
 function get_target_steering {
@@ -198,7 +199,7 @@ on ("0"+ag10+stage:number) {
 
 function phase_descent {
     if (break_guidance_cycle) return.
-    print "Preparing guidance...                      " AT(0,12).
+    print UI_LANG["msg_prep_guidance"] AT(0,12).
     set guidance_status to "PEG initialization".
     peg_init().
     unlock steering.
@@ -221,9 +222,9 @@ function phase_descent {
         lexicon("ve", ve, "thrust", f0, "throttle", std_throttle, "mass", ship:mass, "thro_min", thro_min, "thro_max", 1)
     ).
     if (gst = 0) {
-        hudtext("PEG initialization failed, check your landing orbit parameters", 4, 2, 12, hudtextcolor, false).
+        hudtext(UI_LANG["peg_init_failed"], 4, 2, 12, hudtextcolor, false).
         if P_GUI {
-            gui_update_msg_display("PEG initialization failed, check your landing orbit parameters").
+            gui_update_msg_display(UI_LANG["peg_init_failed"]).
         }
         set guidance_active to false.
         return.
@@ -232,10 +233,10 @@ function phase_descent {
     // vecDraw({return ship:body:position+(gst["vecRF"]-gst["vecErr"]).}, {return (gst["vecRF"]-gst["vecErr"]):normalized*30000.}, RGB(0, 255, 0), "RL", 1, true).
     local theta0 to gst["eta0"].
     local init_num_iter to gst["numiter"].
-    print "Iter " + init_num_iter + ", T = " + round(gst["T"]) + ", dv = "+ round(__peg_get_dv(a0, ve, gst["T"])) + "     " AT(0,14).
+    print UI_LANG["lbl_peg_iter"] + init_num_iter + ", " + UI_LANG["lbl_peg_t"] + round(gst["T"]) + " s, " + UI_LANG["lbl_peg_dv"] + round(_peg_get_dv(a0, ve, gst["T"])) + " m/s " AT(0,14).
     if P_GUI {
         gui_update_status_display(lexicon(
-            "status", "PEG initialization",
+            "status", UI_LANG["status_peg_init"],
             "numiter", init_num_iter,
             "height", alt:radar,
             "distance", target_geo:distance,
@@ -263,10 +264,10 @@ function phase_descent {
     set gst["vecGAV2"] to __toBodyfixed * gst["vecGAV2"].
     set gst["unitHref"] to __toBodyfixed * gst["unitHref"].
 
-    print "Calculate converged, wating for ignition..." AT(0,12).
-    set guidance_status to "Waiting for ignition".
+    print UI_LANG["msg_converged"] AT(0,12).
+    set guidance_status to UI_LANG["status_wait_ign"].
     when (true) then {
-        local msg to "Time to ignition: " + round(ignition_time - time:seconds) + ", eta = " + round(__lo_thetanow) + "->" + round(theta0).
+        local msg to UI_LANG["lbl_time_to_ign"] + round(ignition_time - time:seconds) + " s, eta = " + round(__lo_thetanow) + "->" + round(theta0).
         print msg + "  " AT(0,13).
         if P_GUI {gui_update_msg_display(msg).}
         if (time:seconds >= ignition_time or done) {return false.}  // end trigger
@@ -275,9 +276,9 @@ function phase_descent {
 
     wait until time:seconds >= ignition_time - 60 or (break_guidance_cycle).
     if (break_guidance_cycle) return.
-    print "Aligning to target...                      " AT(0,12).
-    set guidance_status to "Aligning to target".
-    if P_GUI {gui_update_msg_display("Aligning to target...").}
+    print UI_LANG["msg_aligning"] AT(0,12).
+    set guidance_status to UI_LANG["status_aligning"].
+    if P_GUI {gui_update_msg_display(UI_LANG["msg_aligning"]).}
     local throttle_control to initialize_throttle_control(f0, thro_min, std_throttle*f0).
     local throttle_target to simple_get_throttle(std_throttle, thro_min).
     local steering_target to R(0, 0, 0).
@@ -292,8 +293,8 @@ function phase_descent {
         update_steering_target(0).  // response to roll change by user input
         wait 0.  // wait until next physical tick
     }
-    print "Braking start.                             " AT(0,12).
-    set guidance_status to "descent".
+    print UI_LANG["msg_braking_start"] AT(0,12).
+    set guidance_status to UI_LANG["status_descent"].
     set ship:control:translation to TiS:inverse * V(0, 0, 1).  // ullage control
     wait ullage_time.
     lock throttle to throttle_target.
@@ -329,10 +330,10 @@ function phase_descent {
             gst
         ).
         if (abs(gst["T"]) < 1e-6 or abs(gst["T"]) > 1e6) {
-            print "Descent iteration diverged, aborting guidance" AT(0, 16).
-            hudtext("Descent iteration diverged, aborting guidance", 4, 2, 12, hudtextcolor, false).
+            print UI_LANG["err_peg_diverged"] AT(0, 16).
+            hudtext(UI_LANG["err_peg_diverged"], 4, 2, 12, hudtextcolor, false).
             if P_GUI {
-                gui_update_msg_display("Descent iteration diverged, aborting guidance").
+                ggui_update_msg_display(UI_LANG["err_peg_diverged"]).
             }
             set guidance_active to false.
             unlock steering.
@@ -342,8 +343,8 @@ function phase_descent {
         set _time_begin to __time_begin.
         set throttle_control["thrust_target"] to gst["throttle"]*f0.
         set num_iter to num_iter + 1.
-        print "Iter: "+ num_iter+", T = " + round(gst["T"]) + ", dv = " + round(__peg_get_dv(throttle_control["thrust_target"]/ship:mass, ve, gst["T"])) + "     " AT(0,14).
-        print "thro = " + round(gst["throttle"], 3) + ", E = " + round(gst["vecErr"]:mag/1000, 4) + " km    " AT(0,15).
+        print UI_LANG["lbl_peg_iter"] + num_iter + ", " + UI_LANG["lbl_peg_t"] + round(gst["T"]) + " s, " + UI_LANG["lbl_peg_dv"] + round(_peg_get_dv(throttle_control["thrust_target"]/ship:mass, ve, gst["T"])) + " m/s " AT(0,14).
+        print UI_LANG["lbl_thro"] + round(gst["throttle"], 3) + ", " + UI_LANG["lbl_vec_err"] + round(gst["vecErr"]:mag/1000, 4) + " km " AT(0,15).
         if P_GUI {
             gui_update_status_display(lexicon(
                 "status", "descent",
@@ -364,17 +365,18 @@ function phase_descent {
         set _old_ground_speed to ship:groundspeed.
         wait 0.  // wait until next physical tick
     }
-    set guidance_status to "waiting for next phase".
+    set guidance_status to UI_LANG["status_next_ph"].
+
     lock steering to "kill".
     set __gap_throttle to throttle_target.
     lock throttle to __gap_throttle.
 }
 
 function phase_approach {
-    // approach phase have a more precise targeting
+    // approach phase have a more precise targeting.
     if (break_guidance_cycle) return.
-    print "Approach phase.                            " AT(0,12).
-    set guidance_status to "approach".
+    print UI_LANG["msg_approach"] AT(0,12).
+    set guidance_status to UI_LANG["status_approach"].
     local lock appRT to V(0, 0, target_height).
     local appVT to V(0, 0, -0.5). // 0.5 m/s downward
     local appAT to V(0, 0, 0). // no acceleration
@@ -431,8 +433,8 @@ function phase_approach {
         set qS to __control[2].
         // estimate remaining deltav by linear approximation
         local __dv to -(_af:mag + (appAT+V(0,0,g0)):mag)/2 * qT.
-        print "T = " + round(qT) + ", dv = " + round(__dv) + "             " AT(0,14).
-        print "thro = " + round(throttle, 2) + "    " AT(0,15).
+        print UI_LANG["lbl_peg_t"] + round(qT) + " s, " + UI_LANG["lbl_peg_dv"] + round(__dv) + " m/s " AT(0,14).
+        print UI_LANG["lbl_thro"] + round(throttle, 2) + " " AT(0,15).
         if P_GUI {
             gui_update_status_display(lexicon(
                 "status", "approach",
@@ -450,7 +452,7 @@ function phase_approach {
         set numiter to numiter + 1.
         wait 0.  // wait until next physical tick
     }
-    set guidance_status to "waiting for next phase".
+    set guidance_status to UI_LANG["status_next_ph"].
     lock steering to "kill".
     set __gap_throttle to throttle_target.
     lock throttle to __gap_throttle.
@@ -459,8 +461,8 @@ function phase_approach {
 function phase_final {
     if (break_guidance_cycle) return.
     // final phase have no targeting, just reduce lateral speed and land.
-    print "Final phase.                               " AT(0,12).
-    set guidance_status to "final".
+    print UI_LANG["msg_final_phase"] AT(0,12).
+    set guidance_status to UI_LANG["status_final"].
     terminal_init().
     lock lo_fvec to terminal_get_fvec().
     lock steering to get_target_steering(lo_fvec, target_rotation).
@@ -501,18 +503,18 @@ function phase_final {
     wait 0.2.
     unlock steering.
     unlock throttle.
-    set guidance_status to "completed".
+    set guidance_status to UI_LANG["status_completed"].
 }
 
 function summary_guidance {
     if (break_guidance_cycle) return.
-    print "Landing completed." AT(0,22).
-    print "Target distance: " + round(target_geo:distance, 2) + " m" AT(0,23).
+    print UI_LANG["msg_landed"] AT(0,22).
+    print UI_LANG["lbl_tgt_dist"] + round(target_geo:distance, 2) + " m" AT(0,23).
     local __errorfactor to 1/180*constant:pi*(ship:body:radius+target_geo:terrainheight).
     local __errorNorth to (ship:geoposition:lat-target_geo:lat)*__errorfactor.
     local __errorEast to (ship:geoposition:lng-target_geo:lng)*__errorfactor*cos(target_geo:lat).
-    print "Error: " + round(__errorNorth, 2) + " m (North), "
-        + round(__errorEast, 2) + " m (East)" AT(0,24).
+    print "Error: " + round(__errorNorth, 2) + " m (北), "
+        + round(__errorEast, 2) + " m (东)" AT(0,24).
     if P_GUI {
         gui_update_status_display(lexicon(
             "status", "completed",
@@ -526,7 +528,7 @@ function summary_guidance {
             "dv", 0,
             "throttle", 0
         )).
-        gui_update_msg_display("Landing completed. Error = " + round(__errorNorth, 2) + " m (N), " + round(__errorEast, 2) + " m (E)").
+        gui_update_msg_display(UI_LANG["msg_summary"] + round(__errorNorth, 2) + " m (北), " + round(__errorEast, 2) + " m (东)").
     }
 }
 
