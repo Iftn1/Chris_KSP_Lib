@@ -265,7 +265,7 @@ function phase_descent {
     set gst["unitHref"] to __toBodyfixed * gst["unitHref"].
 
     print UI_LANG["msg_converged"] AT(0,12).
-    set guidance_status to UI_LANG["status_wait_ign"].
+    set guidance_status to "Waiting for ignition".
     when (true) then {
         local msg to UI_LANG["lbl_time_to_ign"] + round(ignition_time - time:seconds) + " s, eta = " + round(__lo_thetanow) + "->" + round(theta0).
         print msg + "  " AT(0,13).
@@ -277,7 +277,7 @@ function phase_descent {
     wait until time:seconds >= ignition_time - 60 or (break_guidance_cycle).
     if (break_guidance_cycle) return.
     print UI_LANG["msg_aligning"] AT(0,12).
-    set guidance_status to UI_LANG["status_aligning"].
+    set guidance_status to "Aligning to target".
     if P_GUI {gui_update_msg_display(UI_LANG["msg_aligning"]).}
     local throttle_control to initialize_throttle_control(f0, thro_min, std_throttle*f0).
     local throttle_target to simple_get_throttle(std_throttle, thro_min).
@@ -294,7 +294,7 @@ function phase_descent {
         wait 0.  // wait until next physical tick
     }
     print UI_LANG["msg_braking_start"] AT(0,12).
-    set guidance_status to UI_LANG["status_descent"].
+    set guidance_status to "descent".
     set ship:control:translation to TiS:inverse * V(0, 0, 1).  // ullage control
     wait ullage_time.
     lock throttle to throttle_target.
@@ -365,7 +365,7 @@ function phase_descent {
         set _old_ground_speed to ship:groundspeed.
         wait 0.  // wait until next physical tick
     }
-    set guidance_status to UI_LANG["status_next_ph"].
+    set guidance_status to "waiting for next phase".
 
     lock steering to "kill".
     set __gap_throttle to throttle_target.
@@ -376,7 +376,7 @@ function phase_approach {
     // approach phase have a more precise targeting.
     if (break_guidance_cycle) return.
     print UI_LANG["msg_approach"] AT(0,12).
-    set guidance_status to UI_LANG["status_approach"].
+    set guidance_status to "approach".
     local lock appRT to V(0, 0, target_height).
     local appVT to V(0, 0, -0.5). // 0.5 m/s downward
     local appAT to V(0, 0, 0). // no acceleration
@@ -452,7 +452,7 @@ function phase_approach {
         set numiter to numiter + 1.
         wait 0.  // wait until next physical tick
     }
-    set guidance_status to UI_LANG["status_next_ph"].
+    set guidance_status to "waiting for next phase".
     lock steering to "kill".
     set __gap_throttle to throttle_target.
     lock throttle to __gap_throttle.
@@ -462,7 +462,7 @@ function phase_final {
     if (break_guidance_cycle) return.
     // final phase have no targeting, just reduce lateral speed and land.
     print UI_LANG["msg_final_phase"] AT(0,12).
-    set guidance_status to UI_LANG["status_final"].
+    set guidance_status to "final".
     terminal_init().
     lock lo_fvec to terminal_get_fvec().
     lock steering to get_target_steering(lo_fvec, target_rotation).
@@ -503,7 +503,7 @@ function phase_final {
     wait 0.2.
     unlock steering.
     unlock throttle.
-    set guidance_status to UI_LANG["status_completed"].
+    set guidance_status to "completed".
 }
 
 function summary_guidance {
