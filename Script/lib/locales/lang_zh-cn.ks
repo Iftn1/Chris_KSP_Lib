@@ -1,8 +1,3 @@
-// Localization file of en-us.
-// If you want to create a new localization file, copy this
-// And translate **EVERY KEY** in this file
-// Missing keys will cause errors
-
 GLOBAL UI_LANG IS LEXICON(
     // PEGLand Main Executive
     "pegmain.peg_title", "PEG landing guidance",
