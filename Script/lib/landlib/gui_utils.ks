@@ -143,13 +143,14 @@ function gui_make_peglandgui {
     declare global gui_settings_target_button_box1 to gui_settings_target_box:addhlayout().
     declare global gui_settings_target_waypoint_button to gui_settings_target_button_box1:addbutton("use current waypoint").
     set gui_settings_target_waypoint_button:onclick to {
-        local target_geo to get_target_geo().
-        if (target_geo = 0) {
+        local _target_geo to get_target_geo().
+        if (_target_geo = 0) {
             hudtext("No active waypoint found!", 4, 2, 12, hudtextcolor, false).
             return.
         }
-        set gui_settings_target_lat:text to target_geo:lat:tostring.
-        set gui_settings_target_lng:text to target_geo:lng:tostring.
+        set gui_settings_target_lat:text to _target_geo:lat:tostring.
+        set gui_settings_target_lng:text to _target_geo:lng:tostring.
+        set target_geo to _target_geo.
     }.
     declare global gui_settings_target_show_button to gui_settings_target_button_box1:addcheckbox("show target", false).
     set gui_settings_target_show_button:ontoggle to {
