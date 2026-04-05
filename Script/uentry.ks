@@ -1,4 +1,4 @@
-runOncePath("0:/lang_zh.ks").
+runOncePath("0:/lib/locales/utils.ks").
 runOncePath("0:/lib/utils.ks").
 runOncePath("0:/lib/orbit.ks").
 runOncePath("0:/lib/atm_utils.ks").
@@ -33,7 +33,7 @@ function entry_phase {
     AFS:InitAtmModel().
     local initInfo to entry_initialize_guidance(0, -body:position, ship:velocity:orbit, entry_bank_i, entry_bank_f).
     if (not initInfo["ok"]) {
-        print UI_LANG["msg_error"] + "(" + initInfo["status"] + ") " + initInfo["msg"] AT(0, 30).
+        print "Error: (" + initInfo["status"] + ")" + initInfo["msg"] AT(0, 30).
         return.
     }
     local gst to initInfo["gst"].

@@ -1,4 +1,4 @@
-runOncePath("0:/lang_zh.ks").
+runOncePath("0:/lib/locales/utils.ks").
 parameter P_GUI to true.
 parameter P_PREC to false.
 parameter P_NOWAIT is false.
@@ -233,10 +233,10 @@ function phase_descent {
     // vecDraw({return ship:body:position+(gst["vecRF"]-gst["vecErr"]).}, {return (gst["vecRF"]-gst["vecErr"]):normalized*30000.}, RGB(0, 255, 0), "RL", 1, true).
     local theta0 to gst["eta0"].
     local init_num_iter to gst["numiter"].
-    print UI_LANG["lbl_peg_iter"] + init_num_iter + ", " + UI_LANG["lbl_peg_t"] + round(gst["T"]) + " s, " + UI_LANG["lbl_peg_dv"] + round(__peg_get_dv(a0, ve, gst["T"])) + " m/s " AT(0,14).
+    print "Iter " + init_num_iter + ", T = " + round(gst["T"]) + ", dv = "+ round(__peg_get_dv(a0, ve, gst["T"])) + "     " AT(0,14).
     if P_GUI {
         gui_update_status_display(lexicon(
-            "status", UI_LANG["status_peg_init"],
+            "status", "PEG initialization",
             "numiter", init_num_iter,
             "height", alt:radar,
             "distance", target_geo:distance,
@@ -278,7 +278,7 @@ function phase_descent {
     if (break_guidance_cycle) return.
     print UI_LANG["msg_aligning"] AT(0,12).
     set guidance_status to "Aligning to target".
-    if P_GUI {gui_update_msg_display(UI_LANG["msg_aligning"]).}
+    if P_GUI {gui_update_msg_display(UI_LANG["gui_msg_aligning"]).}
     local throttle_control to initialize_throttle_control(f0, thro_min, std_throttle*f0).
     local throttle_target to simple_get_throttle(std_throttle, thro_min).
     local steering_target to R(0, 0, 0).
@@ -343,8 +343,8 @@ function phase_descent {
         set _time_begin to __time_begin.
         set throttle_control["thrust_target"] to gst["throttle"]*f0.
         set num_iter to num_iter + 1.
-        print UI_LANG["lbl_peg_iter"] + num_iter + ", " + UI_LANG["lbl_peg_t"] + round(gst["T"]) + " s, " + UI_LANG["lbl_peg_dv"] + round(__peg_get_dv(throttle_control["thrust_target"]/ship:mass, ve, gst["T"])) + " m/s " AT(0,14).
-        print UI_LANG["lbl_thro"] + round(gst["throttle"], 3) + ", " + UI_LANG["lbl_vec_err"] + round(gst["vecErr"]:mag/1000, 4) + " km " AT(0,15).
+        print "Iter: "+ num_iter+", T = " + round(gst["T"]) + ", dv = " + round(__peg_get_dv(throttle_control["thrust_target"]/ship:mass, ve, gst["T"])) + "     " AT(0,14).
+        print "thro = " + round(gst["throttle"], 3) + ", E = " + round(gst["vecErr"]:mag/1000, 4) + " km    " AT(0,15).
         if P_GUI {
             gui_update_status_display(lexicon(
                 "status", "descent",
@@ -366,7 +366,6 @@ function phase_descent {
         wait 0.  // wait until next physical tick
     }
     set guidance_status to "waiting for next phase".
-
     lock steering to "kill".
     set __gap_throttle to throttle_target.
     lock throttle to __gap_throttle.
@@ -433,8 +432,8 @@ function phase_approach {
         set qS to __control[2].
         // estimate remaining deltav by linear approximation
         local __dv to -(_af:mag + (appAT+V(0,0,g0)):mag)/2 * qT.
-        print UI_LANG["lbl_peg_t"] + round(qT) + " s, " + UI_LANG["lbl_peg_dv"] + round(__dv) + " m/s " AT(0,14).
-        print UI_LANG["lbl_thro"] + round(throttle, 2) + " " AT(0,15).
+        print "T = " + round(qT) + ", dv = " + round(__dv) + "             " AT(0,14).
+        print "thro = " + round(throttle, 2) + "    " AT(0,15).
         if P_GUI {
             gui_update_status_display(lexicon(
                 "status", "approach",
@@ -513,8 +512,8 @@ function summary_guidance {
     local __errorfactor to 1/180*constant:pi*(ship:body:radius+target_geo:terrainheight).
     local __errorNorth to (ship:geoposition:lat-target_geo:lat)*__errorfactor.
     local __errorEast to (ship:geoposition:lng-target_geo:lng)*__errorfactor*cos(target_geo:lat).
-    print "Error: " + round(__errorNorth, 2) + " m (北), "
-        + round(__errorEast, 2) + " m (东)" AT(0,24).
+    print "Error: " + round(__errorNorth, 2) + " m (North), "
+        + round(__errorEast, 2) + " m (East)" AT(0,24).
     if P_GUI {
         gui_update_status_display(lexicon(
             "status", "completed",
@@ -528,7 +527,7 @@ function summary_guidance {
             "dv", 0,
             "throttle", 0
         )).
-        gui_update_msg_display(UI_LANG["msg_summary"] + round(__errorNorth, 2) + " m (北), " + round(__errorEast, 2) + " m (东)").
+        gui_update_msg_display(UI_LANG["msg_summary"] + round(__errorNorth, 2) + " m (N), " + round(__errorEast, 2) + " m (E)").
     }
 }
 

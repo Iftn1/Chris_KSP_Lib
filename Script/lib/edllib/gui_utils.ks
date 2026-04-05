@@ -1,5 +1,5 @@
 // GUI for uentry.ks
-runOncePath("0:/lang_zh.ks").
+runOncePath("0:/lib/locales/utils.ks").
 runOncePath("0:/lib/utils.ks").
 runOncePath("0:/lib/orbit.ks").
 runOncePath("0:/lib/chrismath.ks").
@@ -212,12 +212,12 @@ function edl_MakeEDLGUI {
     declare global gui_edl_state_box34 to gui_edlmainbox:addhbox().
     declare global gui_edl_state_box3 to gui_edl_state_box34:addvlayout().
     declare global gui_edl_state_box4 to gui_edl_state_box34:addvlayout().
-    declare global gui_edl_state_qdot to gui_edl_state_box3:addlabel(UI_LANG["lbl_qdot"] + "0 kW").
-    declare global gui_edl_state_maxqdot to gui_edl_state_box4:addlabel("M.Heatflux: 0 kW @ 0s").
+    declare global gui_edl_state_qdot to gui_edl_state_box3:addlabel(UI_LANG["lbl_heatflux"] + "0 kW").
+    declare global gui_edl_state_maxqdot to gui_edl_state_box4:addlabel(UI_LANG["lbl_m_heatflux"] + "0 kW @ 0s").
     declare global gui_edl_state_load to gui_edl_state_box3:addlabel(UI_LANG["lbl_load"] + "0 g").
-    declare global gui_edl_state_maxload to gui_edl_state_box4:addlabel(UI_LANG["lbl_max_load"] + "0 g @ 0s").
-    declare global gui_edl_state_dynp to gui_edl_state_box3:addlabel("DynP: 0 kPa").
-    declare global gui_edl_state_maxdynp to gui_edl_state_box4:addlabel("M.Dynp: 0 kPa @ 0s").
+    declare global gui_edl_state_maxload to gui_edl_state_box4:addlabel(UI_LANG["lbl_m_load"] + "0 g @ 0s").
+    declare global gui_edl_state_dynp to gui_edl_state_box3:addlabel(UI_LANG["lbl_dynp"] + "0 kPa").
+    declare global gui_edl_state_maxdynp to gui_edl_state_box4:addlabel(UI_LANG["lbl_m_dynp"] + "0 kPa @ 0s").
 
     declare global gui_edl_state_msg to gui_edlmainbox:addlabel("").
 
@@ -251,7 +251,7 @@ function edl_MakeEDLGUI {
 
     local active_geo to get_target_geo().
     if (active_geo = 0) {
-        hudtext("No active waypoint found!", 4, 2, 12, hudtextcolor, false).
+        hudtext(UI_LANG["hud_no_waypoint"], 4, 2, 12, hudtextcolor, false).
         set active_geo to body:geopositionlatlng(0, 0).
     }
     local entry_dist to (active_geo:position - entry_target_geo:position):mag.
@@ -439,7 +439,7 @@ function edl_MakeEDLGUI {
             UI_LANG["lbl_entry_interface"] + "V = " + round(vecVsrf:mag) 
             + " m/s, " + UI_LANG["lbl_path_angle"] + " = " + round(gammae, 2)
             + "°, " + UI_LANG["lbl_pred_time"] + " = " + round(tt + finalInfo["time_final"]) + " s"
-            + ", thetaf = " + round(thetaf, 1)
+            + ", " + UI_LANG["lbl_thetaf"] + " =  " + round(thetaf, 1)
             + ", " + UI_LANG["lbl_pred_range"] + " = " + round(thetaf/180*constant:pi*body:radius*1e-3) + " km"
             + ", " + UI_LANG["lbl_pred_vf"] + " = " + round(finalInfo["vecV_final"]:mag) + " m/s"
             + ", " + UI_LANG["lbl_pred_hf"] + " = " + round((finalInfo["vecR_final"]:mag - body:radius)*1e-3, 1) + " km"
@@ -533,7 +533,7 @@ function edl_MakeAeroGUI {
     }.
 
     gui_aeromain:addspacing(10).
-    declare global gui_aero_update_button to gui_aeromain:addbutton("Update Profiles").
+    declare global gui_aero_update_button to gui_aeromain:addbutton(UI_LANG["gui_update_aero_profiles"]).
     set gui_aero_update_button:onclick to {
         if (not entry_aeroprofile_process["idle"]) {
             hudtext(UI_LANG["err_process_running"], 4, 2, hudtextsize, hudtextcolor, false).

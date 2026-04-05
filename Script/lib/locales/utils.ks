@@ -1,8 +1,8 @@
 if (addons:available("AFS")) {
     if (addons:AFS:language = "zh-cn") {
-        runPath("./lang_zh.ks").
+        runPath("0:/lib/locales/lang_zh.ks").
     }
 }
 else {
-    runPath("./lang_en.ks").
+    runPath("0:/lib/locales/lang_en.ks").
 }

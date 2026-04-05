@@ -1,4 +1,4 @@
-runOncePath("0:/lang_zh.ks").
+runOncePath("0:/lib/locales/utils.ks").
 runOncePath("0:/lib/orbit.ks").
 runOncePath("0:/lib/engine_utility.ks").
 
