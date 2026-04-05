@@ -460,7 +460,7 @@ function edl_MakeAeroGUI {
     declare global gui_aero_title_box to gui_aeromain:addhbox().
     set gui_aero_title_box:style:height to 40.
     set gui_aero_title_box:style:margin:top to 0.
-    declare global gui_aero_title_label to gui_aerotitle_box:addlabel("<b><size=20>" + UI_LANG["uentryGui.gui_aero_title"] + "</size></b>").
+    declare global gui_aero_title_label to gui_aero_title_box:addlabel("<b><size=20>" + UI_LANG["uentryGui.gui_aero_title"] + "</size></b>").
     set gui_aero_title_label:style:align TO "center".
     declare global gui_aero_title_exit_button to gui_aero_title_box:addbutton("X").
     set gui_aero_title_exit_button:style:width to 20.
